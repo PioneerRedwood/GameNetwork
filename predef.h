@@ -12,6 +12,9 @@
 #include <memory>
 #include <map>
 
+#include "Utils.cpp"
+#include "Logger.h"
+
 #pragma comment(lib, "ws2_32.lib")
 
 

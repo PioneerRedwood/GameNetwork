@@ -5,6 +5,25 @@
 
 namespace Utils
 {
+	// https://stackoverflow.com/questions/8032080/how-to-convert-char-to-wchar-t
+	static const wchar_t*	ConvertToWC(const char* src)
+	{
+		size_t changedSize = -1;
+		const size_t cSize = strlen(src) + 1;
+		wchar_t* wc = new wchar_t[cSize];
+		errno_t err;
+		err = mbstowcs_s(&changedSize, wc, cSize, src, cSize);
+		
+		if(err == 0 && changedSize > 0)
+		{
+			return wc;
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+	
 	static std::wstring		StringToPCWSTR(const std::string& str)
 	{
 		int len;
@@ -51,7 +70,6 @@ namespace Utils
 		// string(const char* begin, const char* end) 주소를 넘겨줘서 생성
 		return std::string(buffer.get(), buffer.get() + size - 1);
 	}
-
 };
 
 #endif

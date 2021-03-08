@@ -26,8 +26,10 @@
     <ClInclude Include="predef.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CPP_Ref_Test.cpp" />
     <ClCompile Include="DataStorage.cpp" />
     <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkClient.cpp" />
     <ClCompile Include="NetworkServer.cpp" />
     <ClCompile Include="Utils.cpp" />
