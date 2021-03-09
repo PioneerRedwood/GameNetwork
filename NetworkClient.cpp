@@ -5,7 +5,7 @@
 
 bool		NetworkClient::Init(int interval)
 {
-	return InitSocket(interval) && Connect();
+	return InitSocket(interval);
 }
 
 bool		NetworkClient::Loop()
@@ -62,6 +62,67 @@ bool		NetworkClient::Loop()
 	return true;
 }
 
+bool		NetworkClient::Connect()
+{
+	int ret = connect(clientSocket, (struct sockaddr*)&address, (int)sizeof(address));
+	if (ret == SOCKET_ERROR)
+	{
+		Logger::Log(LOG_ERROR, "connect() failed");
+		Shutdown();
+		return false;
+	}
+	else
+	{
+		Logger::Log(LOG_INFO, "connected %s:%d", SERVERADDRESS, PORT);
+	}
+
+	FD_SET(clientSocket, &masterfds);
+	return true;
+}
+
+bool		NetworkClient::Send(const char* contents, unsigned size)
+{
+	// 컨텐츠의 양을 보고
+	// BUFFER_SIZE로 쪼갰을 때 send 루프를 얼마나(Sequence 결정)
+	// 돌아야 하는지 알아내야 함
+	// 쪼갠 데이터를 BUFFER_SIZE 만큼 Send
+
+	// 중요! 서버 측에도 데이터를 쪼갰다면 확인해야 함
+	// 순서를 직렬화시키는 과정을 넣어야하지 않을까?
+	// 연결된 고윳값과 순서를 패킷에다 넣어주면 어떨까
+
+	unsigned d = size / BUFFER_SIZE;
+	unsigned i = size % BUFFER_SIZE;
+
+	for (int j = 0; j < d; ++j)
+	{
+		char* buf = new char[BUFFER_SIZE];
+		sprintf_s(&buf[0], 4, "%d", clientId);
+		sprintf_s(&buf[4], 4, "%d", j);
+
+		int dataSize = BUFFER_SIZE - (sizeof(int) << 1);
+		int pos = (int&)*(contents + j * BUFFER_SIZE);
+
+		char* temp = new char[dataSize];
+
+		memcpy_s(temp, dataSize, contents + (j * dataSize), dataSize);
+	}
+
+	while (sendSize <= 0)
+	{
+
+		// 보내는 버퍼의 헤더
+		// SocketBuffer.buffer[0] -> 고윳값	unique key
+		// SocketBuffer.buffer[1] -> 순서	sequence
+		// _ _ _ _ _ _ _ _ 8비트   -> 256개 구분 가능
+		// _ _ _ _ _ _ _ _ .32비트. _ _ _ _ _ _ _ _ -> 4,294,967,296 구분 가능
+
+
+
+	}
+
+}
+
 ///////////////////////////////////////////////////////////////////////////// public
 
 ///////////////////////////////////////////////////////////////////////////// private
@@ -101,24 +162,6 @@ bool		NetworkClient::InitSocket(int interval)
 	timeout.tv_sec = interval;
 	timeout.tv_usec = 0;
 
-	return true;
-}
-
-bool		NetworkClient::Connect()
-{
-	int ret = connect(clientSocket, (struct sockaddr*)&address, (int)sizeof(address));
-	if (ret == SOCKET_ERROR)
-	{
-		Logger::Log(LOG_ERROR, "connect() failed");
-		Shutdown();
-		return false;
-	}
-	else
-	{
-		Logger::Log(LOG_INFO, "connected %s:%d", SERVERADDRESS, PORT);
-	}
-
-	FD_SET(clientSocket, &masterfds);
 	return true;
 }
 

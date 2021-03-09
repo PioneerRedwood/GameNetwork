@@ -33,7 +33,7 @@ void RunClient(bool* isActive)
 	delete client;
 }
 
-int main()
+int _s__main()
 {
 	bool* t1_switch = new bool(true);
 

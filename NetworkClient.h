@@ -10,9 +10,14 @@ public:
 	~NetworkClient() {};
 
 	bool Init(int interval);
+	bool Connect();
 	bool Loop();
 
+	bool Send(const char* contents, unsigned size);
+	bool Recv();
 private:
+	int clientId = -1;
+
 	WSAData data;
 	fd_set	masterfds;
 
@@ -24,7 +29,6 @@ private:
 	char buffer[BUFFER_SIZE];
 
 	bool InitSocket(int interval);
-	bool Connect();
 	bool Shutdown();
 };
 
