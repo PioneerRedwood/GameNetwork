@@ -7,16 +7,16 @@
 
 std::map<int, std::string> maps;
 std::mutex mutex;
-
+/*
 void RunClient(bool* isActive)
 {
 	std::cout << std::this_thread::get_id() << "Client working.. \n";
 
-	NetworkClient* client = new NetworkClient();
+	NetworkServer* server = new NetworkServer();
 	
 	// 타이머를 구현하는데는 방법이 여러가지 있음 참고할 것
 	auto time = std::chrono::high_resolution_clock::now();
-	*isActive = client->Init(1);
+	*isActive = server->Init(1);
 
 	while (*isActive)
 	{
@@ -27,10 +27,10 @@ void RunClient(bool* isActive)
 		{
 			time = now;
 			std::cout << (bool)*isActive << " working..\n";
-			*isActive = client->Loop();
+			*isActive = server->Loop();
 		}
 	}
-	delete client;
+	delete server;
 }
 
 int _s__main()
@@ -60,3 +60,4 @@ int _s__main()
 
 	return 0;
 }
+*/

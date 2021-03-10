@@ -15,14 +15,12 @@ NetworkServer::~NetworkServer()
 	closesocket(masterSocket);
 }
 
-void NetworkServer::Init()
+bool		NetworkServer::Init()
 {
-	InitSocket();
-	Bind();
-	Listen();
+	return InitSocket() && Bind() && Listen();
 }
 
-void NetworkServer::Shutdown()
+void		NetworkServer::Shutdown()
 {
 	WSACleanup();
 	int ret = closesocket(masterSocket);
@@ -36,7 +34,7 @@ void NetworkServer::Shutdown()
 	}
 }
 
-void NetworkServer::Loop()
+void		NetworkServer::Loop()
 {
 	fd_set tempfds;
 	FD_ZERO(&tempfds);
@@ -54,26 +52,25 @@ void NetworkServer::Loop()
 	}
 	else
 	{
-		// 이 부분의 효율을 올리려면 클라이언트 보관 컨테이너를 탐색하는 것이 좋음
-		for (int i = 0; i <= maxfd; ++i)
+		for (SOCKET socket : clientDeque)
 		{
-			if (FD_ISSET(i, &tempfds))
+			if (FD_ISSET(socket, &tempfds))
 			{
-				if (masterSocket == i)
+				if (masterSocket == socket)
 				{
-					// master에선 새로운 연결 처리
+					// master 새로운 연결 처리
 					Connect();
 				}
 				else
 				{
-					Receive(i);
+					Receive(socket);
 				}
 			}
 		}
 	}
 }
 
-uint16_t NetworkServer::SendMessage(uint16_t conn, const char* messageBuffer)
+uint16_t	NetworkServer::SendMessage(uint16_t conn, const char* messageBuffer)
 {
 	int sendSize = send(conn, messageBuffer, sizeof(messageBuffer), 0);
 	if (sendSize < 0)
@@ -91,7 +88,7 @@ uint16_t NetworkServer::SendMessage(uint16_t conn, const char* messageBuffer)
 
 ///////////////////////////////////////////////////////////////////////////// private 
 
-void NetworkServer::Setup(int port, int interval)
+void		NetworkServer::Setup(int port, int interval)
 {
 	int ret = WSAStartup(MAKEWORD(2, 2), &data);
 	if (ret != 0)
@@ -127,7 +124,7 @@ void NetworkServer::Setup(int port, int interval)
 	timeout.tv_usec = 0;
 }
 
-void NetworkServer::InitSocket()
+bool		NetworkServer::InitSocket()
 {
 	int opt = 1;
 	int ret = setsockopt(masterSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&opt, sizeof(int));
@@ -136,45 +133,51 @@ void NetworkServer::InitSocket()
 	{
 		Logger::Log(LOG_ERROR, "setsockopt() failed");
 		Shutdown();
+		return false;
 	}
 	else
 	{
 		Logger::Log(LOG_INFO, "setsockopt() success");
+		return true;
 	}
 }
 
-void NetworkServer::Bind()
+bool		NetworkServer::Bind()
 {
 	int ret = bind(masterSocket, (struct sockaddr*)&server_addr, sizeof(server_addr));
 
 	if (ret < 0)
 	{
 		Logger::Log(LOG_ERROR, "bind() failed");
+		return false;
 	}
 	else
 	{
 		Logger::Log(LOG_INFO, "bind() success");
+		return true;
 	}
 
 	FD_SET(masterSocket, &masterfds);
 	maxfd = masterSocket;
 }
 
-void NetworkServer::Listen()
+bool		NetworkServer::Listen()
 {
 	int ret = listen(masterSocket, BACKLOG);
 
 	if (ret < 0)
 	{
 		Logger::Log(LOG_ERROR, "listen() failed");
+		return false;
 	}
 	else
 	{
 		Logger::Log(LOG_INFO, "listen() success");
+		return true;
 	}
 }
 
-void NetworkServer::Connect()
+bool		NetworkServer::Connect()
 {
 	sockaddr_in client;
 	int clientSize = sizeof(struct sockaddr_in);
@@ -189,8 +192,6 @@ void NetworkServer::Connect()
 	{
 		FD_SET(tempSocket, &masterfds);
 
-		// 클라이언트 정보 모두 담는 컨테이너 클래스에 저장하기
-
 		wchar_t host[NI_MAXHOST] = { 0, };
 		wchar_t service[NI_MAXSERV] = { 0, };
 
@@ -201,27 +202,32 @@ void NetworkServer::Connect()
 			Logger::Log(LOG_INFO, "Connection on port: %s:%s\n", std::string(hs.begin(), hs.end()).c_str(), std::string(serv.begin(), serv.end()).c_str());
 
 			// 첫 접속 시 보내는 메시지
-			int ret = send(tempSocket, MSG_GREETING, 6, 0);
+			ZeroMemory(buffer, BUFFER_SIZE);
+			std::string welcomeMsg = "Welcome!";
+
+			sprintf_s(&buffer[0], 4, "%d", tempSocket);
+			sprintf_s(&buffer[4], sizeof(welcomeMsg), "%s", welcomeMsg.c_str());
+
+			int ret = send(tempSocket, buffer, BUFFER_SIZE, 0);
 			if (ret < 0)
 			{
 				Logger::Log(LOG_ERROR, "send() msg greeting failed");
+				return false;
 			}
 			else
 			{
-				// 이때 클라이언트 정보를 담아야 함
-				// 일단 maxfd 보다 작은 만큼 소켓을 순회하도록
-				if (tempSocket > maxfd)
-				{
-					maxfd = tempSocket;
-				}
+				clientDeque.push_back(tempSocket);
+				clientMap.insert(std::make_pair(tempSocket, clientId++));
+				return true;
 			}
 		}
 	}
 
+	return false;
 	// Call New Connection event (callback)
 }
 
-void NetworkServer::Receive(int client_fd)
+bool		NetworkServer::Receive(SOCKET client_fd)
 {
 	int ret = recv(client_fd, buffer, BUFFER_SIZE, 0);
 	if (ret <= 0)
@@ -231,19 +237,29 @@ void NetworkServer::Receive(int client_fd)
 			// Call disconnected callback
 			closesocket(client_fd);
 			FD_CLR(client_fd, &masterfds);
-			return;
+			clientMap.erase(client_fd);
+			return false;
 		}
 		else
 		{
 			Logger::Log(LOG_ERROR, "recv() failed");
+			return false;
 		}
 		closesocket(client_fd);
 		FD_CLR(client_fd, &masterfds);
-		return;
+		clientMap.erase(client_fd);
+		return false;
 	}
-	Logger::Log(LOG_INFO, "received << %s", buffer);
-	// Call receive success callback
-	ZeroMemory(buffer, BUFFER_SIZE);
+	else
+	{
+		Logger::Log(LOG_INFO, "received << %s", buffer);
+		// 패킷 파싱
+		// ParsingPacket()
+		// buffer[0] : clientId
+		// buffer[1] : seq
+		return true;
+	}
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////// private 

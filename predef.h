@@ -17,7 +17,6 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-
 //////////////////////////////////////////////////////////
 
 #define		LOG_ERROR			-1
@@ -31,7 +30,13 @@
 #define		BUFFER_SIZE			2048				// 2KB
 #define		PORT				9000
 #define		BACKLOG				5
-#define		MSG_GREETING		"Hello!"
 
 //////////////////////////////////////////////////////////
+
+#define		MSG_CONNECT_BYTES	0x05
+#define		MAX_PAYLOAD_SIZE	1200
+#define		TIMEOUT				10
+
+//////////////////////////////////////////////////////////
+
 #endif // !_PREDEF_

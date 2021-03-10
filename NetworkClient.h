@@ -26,6 +26,26 @@ private:
 	SOCKET	clientSocket;
 	SOCKADDR_IN address;
 
+	struct SocketBuffer
+	{
+		int totalSize;
+		int currentSize;
+
+		char buffer[BUFFER_SIZE] = { 0, };
+
+		SocketBuffer()
+		{
+			totalSize = -1;
+			currentSize = 0;
+
+			ZeroMemory(buffer, BUFFER_SIZE);
+		}
+	};
+
+	SocketBuffer sBuffer;
+
+	std::deque<SocketBuffer> bufferDeque;
+
 	char buffer[BUFFER_SIZE];
 
 	bool InitSocket(int interval);

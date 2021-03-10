@@ -25,6 +25,8 @@
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="NetworkServer.h" />
     <ClInclude Include="predef.h" />
+    <ClInclude Include="Stream.h" />
+    <ClInclude Include="StreamWrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CPP_Ref_Test.cpp" />
@@ -34,6 +36,9 @@
     <ClCompile Include="NetworkClient.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="NetworkServer.cpp" />
+    <ClCompile Include="Packet.cpp" />
+    <ClCompile Include="Stream.cpp" />
+    <ClCompile Include="StreamWrapper.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -25,6 +25,8 @@ bool		NetworkClient::Loop()
 			ret = recv(clientSocket, buffer, BUFFER_SIZE, 0);
 			if (ret > 0)
 			{
+				clientId = (int)buffer[0];
+
 				Logger::Log(LOG_INFO, "received: %s\n", std::string(buffer).c_str());
 			}
 			else
@@ -91,36 +93,63 @@ bool		NetworkClient::Send(const char* contents, unsigned size)
 	// 순서를 직렬화시키는 과정을 넣어야하지 않을까?
 	// 연결된 고윳값과 순서를 패킷에다 넣어주면 어떨까
 
-	unsigned d = size / BUFFER_SIZE;
-	unsigned i = size % BUFFER_SIZE;
+	unsigned contentReadSize = BUFFER_SIZE - 8;
 
-	for (int j = 0; j < d; ++j)
+	unsigned d = size / contentReadSize;
+	unsigned i = size % contentReadSize;
+
+	unsigned seq = 0;
+
+	if (d > 0)
 	{
-		char* buf = new char[BUFFER_SIZE];
-		sprintf_s(&buf[0], 4, "%d", clientId);
-		sprintf_s(&buf[4], 4, "%d", j);
+		for (seq = 0; seq < d; ++seq)
+		{
+			SocketBuffer buf;
+			ZeroMemory(buf.buffer, BUFFER_SIZE);
 
-		int dataSize = BUFFER_SIZE - (sizeof(int) << 1);
-		int pos = (int&)*(contents + j * BUFFER_SIZE);
+			sprintf_s(&buf.buffer[0], 4, "%d", clientId);
+			sprintf_s(&buf.buffer[4], 4, "%d", seq);
 
-		char* temp = new char[dataSize];
+			const char* pos = (contents + (unsigned long long)seq * contentReadSize);
 
-		memcpy_s(temp, dataSize, contents + (j * dataSize), dataSize);
+			memcpy_s(buf.buffer + 8, contentReadSize, pos, contentReadSize);
+
+			bufferDeque.push_back(buf);
+		}
 	}
 
-	while (sendSize <= 0)
+	if (i > 0)
 	{
+		SocketBuffer buf;
+		ZeroMemory(buf.buffer, BUFFER_SIZE);
 
-		// 보내는 버퍼의 헤더
-		// SocketBuffer.buffer[0] -> 고윳값	unique key
-		// SocketBuffer.buffer[1] -> 순서	sequence
-		// _ _ _ _ _ _ _ _ 8비트   -> 256개 구분 가능
-		// _ _ _ _ _ _ _ _ .32비트. _ _ _ _ _ _ _ _ -> 4,294,967,296 구분 가능
+		sprintf_s(&buf.buffer[0], 4, "%d", clientId);
+		sprintf_s(&buf.buffer[4], 4, "%d", seq);
 
+		const char* pos = (contents + (unsigned long long)seq * contentReadSize);
 
+		memcpy_s(buf.buffer + 8, contentReadSize, pos, i);
 
+		bufferDeque.push_back(buf);
 	}
 
+	for (SocketBuffer& sockBuff : bufferDeque)
+	{
+		int ret = send(clientSocket, sockBuff.buffer, BUFFER_SIZE, 0);
+		if (ret < 0)
+		{
+			Logger::Log(LOG_ERROR, "send() failed");
+			Shutdown();
+			return false;
+		}
+		else
+		{
+			// 보냈다면?
+
+		}
+	}
+
+	return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////// public

@@ -1,14 +1,13 @@
-//////////////////////////////////////////////////////////// mutex test
+// Test Everything
 
 #include "predef.h"
 #include "NetworkClient.h"
 #include "NetworkServer.h"
 
 #include <thread>
-#include <mutex>
 #include <unordered_set>
 
-std::mutex _mutex;
+#include "Stream.h"
 
 template<typename Diff>
 void Log(Diff d)
@@ -21,7 +20,7 @@ void Log(Diff d)
 void Runnit()
 {
 	// mutex를 해제하는 파괴자를 가진 클래스
-	std::lock_guard<std::mutex> guard(_mutex);
+	//std::lock_guard<std::mutex> guard(_mutex);
 
 	std::cout << "Runnit! " << std::this_thread::get_id() << '\n';
 	auto t1 = std::chrono::high_resolution_clock::now();
@@ -56,7 +55,7 @@ int main()
 
 	char* temp = new char[100 - (sizeof(int) * 2)];
 	std::cout << (sizeof(int) << 1);*/
-
+	/*
 	struct SocketBuffer
 	{
 		int totalSize;
@@ -85,13 +84,13 @@ int main()
 		"asdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd";
 	// param2: size of contents
 	unsigned size = 622;
-	
+
 	// locale variables
 	int contentReadSize = bufferSize - (sizeof(int) << 1);
 
 	unsigned d = size / contentReadSize;
 	unsigned i = size % contentReadSize;
-	
+
 	SocketBuffer buf;
 	int seq = 0;
 	// locale variables
@@ -123,56 +122,52 @@ int main()
 		const char* pos = (contents + seq * contentReadSize);
 
 		memcpy_s(buf.buffer + (sizeof(int) << 1), contentReadSize, pos, i);
-		
-		sprintf_s(&buf.buffer[bufferSize - sizeof(int)], sizeof(int), "%d", '\0');
 
 		buffList.push_back(buf);
 	}
 
-	std::vector<int, std::string> vec;
+	std::vector<std::pair<int, std::string>> vec;
 	std::map<int, char*> _map;
-	std::string str = std::string("");
 
 	// 서버 측에서 패킷 파싱
 	for (SocketBuffer& buffer : buffList)
 	{
 		// 해당 id에서 온 패킷의 시퀀스가 총 몇까지 있는지
-		// 
-		// buffer.buffer[9] ~ 
+		//
+		// buffer.buffer[9] ~
 		if (buffer.buffer[0] == 255)
 		{
 			// 시퀀스에 맞게 정렬
-			
+
 			if (buffer.buffer[1] != 0)
 			{
 				// point 형식을 쓰는게 좋을듯
 				char* buf = new char[contentReadSize];
 				memcpy_s(buf, contentReadSize, buffer.buffer + (sizeof(int) << 1), contentReadSize);
-				
-				std::string tempStr = std::string(buf);
-				int tempInt = atoi(buffer.buffer[1]);
 
-				vec.insert(std::make_pair((int)buffer.buffer[1], tempStr));
-				str.append(buf);
+				std::string str = std::string(buf);
+				int tempInt = atoi(&buffer.buffer[1]);
+
+				std::pair<int, std::string> tempPair = std::make_pair(tempInt, str);
+				vec.push_back(tempPair);
 				delete[] buf;
 			}
 		}
 	}
+	*/
 
-	std::cout << str << std::flush;
+	char* buffer = new char[2048];
+	ZeroMemory(buffer, 2048);
+
+	Stream* stream = new Stream();
+
+	stream->WriteBytes("char", 5);
+	int i = stream->ReadBytes(buffer, 5);
 
 	return 0;
 }
 
 ////////////////////////////////////////////////// Server Test
-
-#include "predef.h"
-#include "NetworkServer.h"
-
-#include <stdio.h>
-#include <thread>
-#include <mutex>
-#include <Windows.h>
 
 void RunServer(bool* isActive)
 {

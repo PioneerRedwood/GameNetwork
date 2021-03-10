@@ -9,7 +9,7 @@ public:
 	NetworkServer();
 	~NetworkServer();
 
-	void Init();
+	bool Init();
 	void Shutdown();
 	void Loop();
 
@@ -32,11 +32,15 @@ private:
 	char buffer[BUFFER_SIZE];
 
 	void Setup(int port, int interval);
-	void InitSocket();
-	void Bind();
-	void Listen();
-	void Connect();
-	void Receive(int fd);
+	bool InitSocket();
+	bool Bind();
+	bool Listen();
+	bool Connect();
+	bool Receive(SOCKET fd);
+
+	int clientId = 0;
+	std::deque<SOCKET> clientDeque;
+	std::map<SOCKET, int> clientMap;
 };
 
 #endif
