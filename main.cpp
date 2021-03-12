@@ -1,63 +1,141 @@
 #include "predef.h"
-#include "NetworkClient.h"
 #include "NetworkServer.h"
 
+#include <chrono>
 #include <thread>
-#include <mutex>
+#include "NetworkClient.h"
 
-std::map<int, std::string> maps;
-std::mutex mutex;
-/*
-void RunClient(bool* isActive)
+
+// server main
+int main()
 {
-	std::cout << std::this_thread::get_id() << "Client working.. \n";
+	std::cout << std::this_thread::get_id() << " worked..\n";
+	double period = 0.25;
 
-	NetworkServer* server = new NetworkServer();
-	
-	// 타이머를 구현하는데는 방법이 여러가지 있음 참고할 것
-	auto time = std::chrono::high_resolution_clock::now();
-	*isActive = server->Init(1);
+	NetworkServer server;
+	DataStorage::GetInstance()->SetValue("filelog", true);
+	DataStorage::GetInstance()->SetValue("consolelog", true);
 
-	while (*isActive)
+	std::chrono::system_clock::time_point startTime = std::chrono::system_clock::now();
+
+	if (server.Init(period))
 	{
-		auto now = std::chrono::high_resolution_clock::now();
-		auto diff = std::chrono::duration_cast<std::chrono::seconds>(now - time).count();
-
-		if (diff > 3)
+		while (true)
 		{
-			time = now;
-			std::cout << (bool)*isActive << " working..\n";
-			*isActive = server->Loop();
-		}
-	}
-	delete server;
-}
-
-int _s__main()
-{
-	bool* t1_switch = new bool(true);
-
-	std::thread clientThreads1(RunClient, t1_switch);
-	
-	std::string str;
-
-	while (true)
-	{
-		std::cin >> str;
-		if (str.compare("q") == 0)
-		{
-			*t1_switch = false;
-
-			break;
-		}
-		else
-		{
-			std::cout << str << std::endl << "> ";
+			if (server.Connect())
+			{
+				while (true)
+				{
+					std::chrono::duration<double> now = std::chrono::system_clock::now() - startTime;
+					if (now.count() >= period)
+					{
+						startTime = std::chrono::system_clock::now();
+						if (!server.Loop())
+						{
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				std::chrono::duration<double> now = std::chrono::system_clock::now() - startTime;
+				if (now.count() >= period)
+				{
+					std::cout << "lisening.. \n";
+					startTime = std::chrono::system_clock::now();
+					continue;
+				}
+			}
 		}
 	}
 
-	clientThreads1.join();
+	server.Shutdown();
+	std::cout << std::this_thread::get_id() << " exit..\n";
 
 	return 0;
 }
-*/
+
+// client main
+int clientMain()
+{
+	/*
+		auto tempClient = [](double period)
+		{
+			DataStorage::GetInstance()->SetValue("filelog", true);
+
+			std::cout << std::this_thread::get_id() << " worked..\n";
+			NetworkClient client;
+			std::chrono::system_clock::time_point startTime = std::chrono::system_clock::now();
+
+			if (client.Init(1, PORT))
+			{
+				if (client.Connect())
+				{
+					while (true)
+					{
+						std::chrono::duration<double> now = std::chrono::system_clock::now() - startTime;
+						if (now.count() >= period)
+						{
+							startTime = std::chrono::system_clock::now();
+							if (!client.Loop())
+							{
+								break;
+							}
+						}
+					}
+				}
+			}
+			client.Shutdown();
+			std::cout << std::this_thread::get_id() << " exit..\n";
+		};
+
+		//std::thread clientThread = std::thread(tempClient, 3.0);
+		//serverThread.join();
+	*/
+
+	std::cout << std::this_thread::get_id() << " worked..\n";
+	double period = 0.25;
+
+	NetworkClient client;
+	DataStorage::GetInstance()->SetValue("filelog", true);
+	DataStorage::GetInstance()->SetValue("consolelog", true);
+
+	std::chrono::system_clock::time_point startTime = std::chrono::system_clock::now();
+
+	if (client.Init(period, PORT))
+	{
+		while (true)
+		{
+			if (client.Connect())
+			{
+				while (true)
+				{
+					std::chrono::duration<double> now = std::chrono::system_clock::now() - startTime;
+					if (now.count() >= period)
+					{
+						startTime = std::chrono::system_clock::now();
+						if (!client.Loop())
+						{
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				std::chrono::duration<double> now = std::chrono::system_clock::now() - startTime;
+				if (now.count() >= period)
+				{
+					startTime = std::chrono::system_clock::now();
+					continue;
+				}
+			}
+		}
+	}
+
+	client.Shutdown();
+	std::cout << std::this_thread::get_id() << " exit..\n";
+
+	return 0;
+}

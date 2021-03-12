@@ -15,9 +15,9 @@ NetworkServer::~NetworkServer()
 	closesocket(masterSocket);
 }
 
-bool		NetworkServer::Init()
+bool		NetworkServer::Init(unsigned sec)
 {
-	return InitSocket() && Bind() && Listen();
+	return InitSocket(sec) && Bind() && Listen();
 }
 
 void		NetworkServer::Shutdown()
@@ -34,17 +34,18 @@ void		NetworkServer::Shutdown()
 	}
 }
 
-void		NetworkServer::Loop()
+bool		NetworkServer::Loop()
 {
+	bool isOK = false;
+
 	fd_set tempfds;
 	FD_ZERO(&tempfds);
 
 	tempfds = masterfds;
-	int ret = select(maxfd + 1, &tempfds, nullptr, nullptr, &timeout);
+	int ret = select(0, &tempfds, nullptr, nullptr, &timeout);
 	if (ret < 0)
 	{
 		Logger::Log(LOG_ERROR, "select() failed");
-		Shutdown();
 	}
 	else if (ret == 0)
 	{
@@ -59,15 +60,17 @@ void		NetworkServer::Loop()
 				if (masterSocket == socket)
 				{
 					// master 货肺款 楷搬 贸府
-					Connect();
+					isOK = Connect();
 				}
 				else
 				{
-					Receive(socket);
+					isOK = Receive(socket);
 				}
 			}
 		}
 	}
+
+	return isOK;
 }
 
 uint16_t	NetworkServer::SendMessage(uint16_t conn, const char* messageBuffer)
@@ -124,7 +127,7 @@ void		NetworkServer::Setup(int port, int interval)
 	timeout.tv_usec = 0;
 }
 
-bool		NetworkServer::InitSocket()
+bool		NetworkServer::InitSocket(unsigned sec)
 {
 	int opt = 1;
 	int ret = setsockopt(masterSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&opt, sizeof(int));
@@ -140,6 +143,9 @@ bool		NetworkServer::InitSocket()
 		Logger::Log(LOG_INFO, "setsockopt() success");
 		return true;
 	}
+
+	timeout.tv_sec = sec;
+	timeout.tv_usec = 0;
 }
 
 bool		NetworkServer::Bind()

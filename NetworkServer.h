@@ -9,9 +9,10 @@ public:
 	NetworkServer();
 	~NetworkServer();
 
-	bool Init();
+	bool Init(unsigned sec);
 	void Shutdown();
-	void Loop();
+	bool Loop();
+	bool Connect();
 
 	// callbacks?
 	uint16_t SendMessage(uint16_t conn, const char* messageBuffer);
@@ -32,10 +33,9 @@ private:
 	char buffer[BUFFER_SIZE];
 
 	void Setup(int port, int interval);
-	bool InitSocket();
+	bool InitSocket(unsigned sec);
 	bool Bind();
 	bool Listen();
-	bool Connect();
 	bool Receive(SOCKET fd);
 
 	int clientId = 0;

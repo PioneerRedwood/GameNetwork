@@ -50,6 +50,20 @@ float		DataStorage::GetFloatValue(std::string key, float d)
 	return (float)atof(ret.c_str());
 }
 
+void		DataStorage::SetValue(std::string key, bool value)
+{
+	if (value)
+	{
+		SetValue(key, std::string("true"));
+	}
+	else
+	{
+		SetValue(key, std::string("false"));
+	}
+
+	return;
+}
+
 void		DataStorage::SetValue(std::string key, int value)
 {
 	char valueStr[256];

@@ -3,18 +3,39 @@
 
 #include "predef.h"
 
+struct SocketBuffer
+{
+	int totalSize;
+	int currentSize;
+
+	char buffer[BUFFER_SIZE] = { 0, };
+
+	SocketBuffer()
+	{
+		totalSize = -1;
+		currentSize = 0;
+
+		ZeroMemory(buffer, BUFFER_SIZE);
+	}
+};
+
 class NetworkClient
 {
 public:
 	NetworkClient() {};
 	~NetworkClient() {};
 
-	bool Init(int interval);
+	std::deque<SocketBuffer> bufferDeque;
+
+	bool Init(unsigned sec, int port);
 	bool Connect();
 	bool Loop();
 
+	bool Shutdown();
+
 	bool Send(const char* contents, unsigned size);
 	bool Recv();
+
 private:
 	int clientId = -1;
 
@@ -26,30 +47,9 @@ private:
 	SOCKET	clientSocket;
 	SOCKADDR_IN address;
 
-	struct SocketBuffer
-	{
-		int totalSize;
-		int currentSize;
-
-		char buffer[BUFFER_SIZE] = { 0, };
-
-		SocketBuffer()
-		{
-			totalSize = -1;
-			currentSize = 0;
-
-			ZeroMemory(buffer, BUFFER_SIZE);
-		}
-	};
-
-	SocketBuffer sBuffer;
-
-	std::deque<SocketBuffer> bufferDeque;
-
 	char buffer[BUFFER_SIZE];
 
-	bool InitSocket(int interval);
-	bool Shutdown();
+	bool InitSocket(unsigned sec, int port);
 };
 
 #endif // !_NETWORKCLIENT_

@@ -23,6 +23,7 @@ public:
 	float			GetFloatValue(std::string key, float d = 0.f);
 	std::string		GetValue(std::string key);
 
+	void			SetValue(std::string key, bool value);
 	void			SetValue(std::string key, int value);
 	void			SetValue(std::string key, float vlaue);
 	void			SetValue(std::string key, std::string value);

@@ -14,6 +14,7 @@
 
 #include "Utils.cpp"
 #include "Logger.h"
+#include "DataStorage.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -33,9 +34,10 @@
 
 //////////////////////////////////////////////////////////
 
-#define		MSG_CONNECT_BYTES	0x05
-#define		MAX_PAYLOAD_SIZE	1200
-#define		TIMEOUT				10
+#define		MSG_CONNECTION_REQUEST			0x10
+#define		MSG_CONNECTION_RESPONSE			0x11
+#define		MSG_CONNECTION_DENY				0x12
+#define		MSG_KEEPALVIE					0x13
 
 //////////////////////////////////////////////////////////
 
