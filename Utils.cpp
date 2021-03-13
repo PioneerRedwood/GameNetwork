@@ -70,6 +70,8 @@ namespace Utils
 		// string(const char* begin, const char* end) 주소를 넘겨줘서 생성
 		return std::string(buffer.get(), buffer.get() + size - 1);
 	}
+	
+
 };
 
 #endif
