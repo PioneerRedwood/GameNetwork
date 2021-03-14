@@ -36,3 +36,10 @@ TODO: @최적화
 네트워크 데이터 패킹에는 왕도가 있다? 없다? http://www.sdltutorials.com/cpp-tip-packing-data
 
 플랫폼을 가리지 않는 소켓 프로그래밍 https://web.archive.org/web/20180823021126/https://gafferongames.com/post/sending_and_receiving_packets/ 해당 웹사이트는 도움되는 글들이 많다.
+
+
+
+##### 2021.03.14
+
+클라이언트는 유니티 C#으로 통신을 할 예정, [Google의 protobuf](https://developers.google.com/protocol-buffers/docs/cpptutorial#where-to-find-the-example-code)를 진행하고 있다. 
+

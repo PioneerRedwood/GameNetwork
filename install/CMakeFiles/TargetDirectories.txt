@@ -1,0 +1,14 @@
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/libprotobuf-lite.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/protoc.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/libprotoc.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/libprotobuf.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/gmock_main.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/gmock.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/tests.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/test_plugin.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/lite-test.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/lite-arena-test.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/check.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/INSTALL.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/ALL_BUILD.dir
+C:/Users/Redwood/source/repos/GameNetwork/install/CMakeFiles/ZERO_CHECK.dir

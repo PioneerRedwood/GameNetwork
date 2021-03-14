@@ -1,3 +1,4 @@
+
 #include "predef.h"
 #include "NetworkServer.h"
 
@@ -5,9 +6,7 @@
 #include <thread>
 #include "NetworkClient.h"
 
-#define SIZE 128
 
-// server main
 int main()
 {
 #if 0
@@ -29,8 +28,11 @@ int main()
 		std::cout << (j | buffer[i]) << " ";
 		std::cout << (j & buffer[i]) << "\n";
 	}
+	
+	
 
 #else
+	// server 
 	double period = 0.5;
 
 	NetworkServer server;
@@ -53,29 +55,9 @@ int main()
 				}
 			}
 		}
-
-		//while (true)
-		//{
-		//	
-		//	/*if (server.Connect())
-		//	{
-		//		
-		//	}
-		//	else
-		//	{
-		//		std::chrono::duration<double> now = std::chrono::system_clock::now() - startTime;
-		//		if (now.count() >= period)
-		//		{
-		//			std::cout << "lisening.. \n";
-		//			startTime = std::chrono::system_clock::now();
-		//			continue;
-		//		}
-		//	}*/
-		//}
 	}
 
 	server.Shutdown();
-
 #endif
 	return 0;
 }
@@ -83,7 +65,7 @@ int main()
 // client main
 int clientMain()
 {
-	/*
+	
 		auto tempClient = [](double period)
 		{
 			DataStorage::GetInstance()->SetValue("filelog", true);
@@ -116,7 +98,7 @@ int clientMain()
 
 		//std::thread clientThread = std::thread(tempClient, 3.0);
 		//serverThread.join();
-	*/
+	
 
 	std::cout << std::this_thread::get_id() << " worked..\n";
 	double period = 0.25;
@@ -163,3 +145,5 @@ int clientMain()
 
 	return 0;
 }
+
+
