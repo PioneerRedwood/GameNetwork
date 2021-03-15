@@ -93,20 +93,6 @@ void		NetworkServer::Setup()
 
 bool		NetworkServer::InitSocket(long sec)
 {
-	//int opt = 1;
-	//int ret = setsockopt(masterSocket, IPPROTO_TCP, TCP_NODELAY, (const char*)&opt, sizeof(int));
-	//if (ret < 0)
-	//{
-	//	Logger::Log(LOG_ERROR, "setsockopt() failed %d", WSAGetLastError());
-	//	Shutdown();
-	//	return false;
-	//}
-	//else
-	//{
-	//	Logger::Log(LOG_INFO, "setsockopt() success");
-	//	return true;
-	//}
-
 	bool result = false;
 
 	timeout.tv_sec = sec;
@@ -170,7 +156,6 @@ bool		NetworkServer::Connect()
 
 		if (GetNameInfoW((sockaddr*)&client, clientSize, host, NI_MAXHOST, service, NI_MAXSERV, 0) == 0)
 		{
-			// 새로운 접속 컨테이너에 저장
 			std::wstring hs(host);
 			std::wstring serv(service);
 			Logger::Log(LOG_INFO, "New connection! %s:%s\n", std::string(hs.begin(), hs.end()).c_str(), std::string(serv.begin(), serv.end()).c_str());
@@ -178,7 +163,6 @@ bool		NetworkServer::Connect()
 			clientDeque.push_back(tempSocket);
 			clientMap.insert(std::make_pair(tempSocket, clientId++));
 
-			// 응답 패킷 전송
 			if (AssemblePacket(PacketType::ConnectionResponse, "Welcome!", 9) < 0)
 			{
 				Logger::Log(LOG_ERROR, "AssemblePacket() failed");
@@ -186,6 +170,7 @@ bool		NetworkServer::Connect()
 			}
 			else
 			{
+				// 처음에만 보냄
 				if (!sendStack.empty())
 				{
 					if (send(tempSocket, sendStack.top().buffer, BUFFER_SIZE, 0))
@@ -231,10 +216,13 @@ bool		NetworkServer::Receive(SOCKET client_fd)
 	}
 	else
 	{
-		Logger::Log(LOG_INFO, "%d : %s", client_fd, buffer);
-
-		// 패킷 파싱
 		// ParsingPacket()
+		Logger::Log(LOG_INFO, "%d : %s", client_fd, buffer);
+		
+		std::string str = Utils::GetCurrentDateTime();
+		const char* now = str.c_str();
+
+		ret = send(client_fd, now, sizeof(str), 0);
 		return true;
 	}
 	

@@ -1,5 +1,5 @@
 # Game Network
-### 2021.03.07 ~
+### 2021.03.07 ~ 2021.03.15
 
 유니티와 연동 가능한 게임 네트워크 모듈, 그와 관련된 서버와 클라이언트 제작
 
@@ -42,4 +42,10 @@ TODO: @최적화
 ##### 2021.03.14
 
 클라이언트는 유니티 C#으로 통신을 할 예정, [Google의 protobuf](https://developers.google.com/protocol-buffers/docs/cpptutorial#where-to-find-the-example-code)를 진행하고 있다. 
+
+
+
+##### 2021.03.15
+
+유니티 클라이언트 제작해서 C++ 서버와 간단한 시간 데이터를 송수신하는 것을 구현했다. 이제 더는 해당 레포지토리에 푸시는 없다. [학교 내 진행하는 프로젝트](https://github.com/PioneerRedwood/Bletchley에 집중한다.
 
